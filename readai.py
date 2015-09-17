@@ -40,7 +40,6 @@ class Node(list):
           prev_node = prev_node.prev
         ret.append(prev_node.label)
 
-        print ret
         while cur_node.label not in smap and len(cur_node) > 0:
           ret.append(cur_node.label)
           cur_node = cur_node[0][1]
@@ -113,7 +112,6 @@ def get_root_word(word):
 def get_node(label):
   if label not in smap:
     smap[label] = Node(label)
-    smap[label].set('->', Node(label + "'s properties"))
   return smap[label]
 
 def flatten_tree(tree):
@@ -266,8 +264,10 @@ def describe(tree):
     action_node.set('.', obj)
 
     if matches('( VP ( VB/VBZ/VBP/VPZ/VBD/VBG/VBN ) ( NP ) ( PP ) )', tree):
-      prop, prop_node = describe(tree[2])
-      action_node.set(prop, prop_node)
+      # Assume rest is PP
+      for pp_node in tree[2:]:
+        prop, prop_node = describe(pp_node)
+        action_node.set(prop, prop_node)
 
     return action, action_node
 
@@ -348,19 +348,6 @@ def answer(tree):
       return "Nothing"
     return ','.join(objs)
 
-  if matches("""
-    ( SBARQ 
-      ( WHNP ( . ) ( NN ) )
-      ( SQ ( VBP ) ( NP ) ) )""", tree):
-    # Ex: What color are blueberries
-    qtype = get_word(tree[0][0])
-    propy = get_word(tree[0][1])
-    action = get_root_word(get_word(tree[1][0]))
-
-    print "%s %s %s ____" % (subject, propy, action)
-
-    return get_node(subject).get('->').get(propy).get(action).label
-
   print "ERROR answering"
 
 
@@ -368,12 +355,12 @@ line = raw_input("Enter line: ")
 
 while line != 'stop':
   sent = list(parser.raw_parse(line))[0]
-  # print sent
+  #print sent
   if sent[0].label() == "SBARQ":
     print answer(sent)
   else:
     describe(sent)
-    # print smap
+    #print smap
   line = raw_input("Enter line: ")
 
 """
