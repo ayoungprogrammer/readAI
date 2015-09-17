@@ -108,9 +108,6 @@ def get_word(tree):
     return tree
 
 def get_root_word(word):
-  if word in root:
-    return root[word]
-  else:
     return en.verb.present(word)
 
 def get_node(label):
@@ -183,12 +180,6 @@ def match_tokens(tokens, tree):
       return False
   return True
 
-def get_property(adj):
-  if adj in ['red', 'blue', 'green']:
-    return 'color'
-  else:
-    return None
-
 # Returns subject
 def describe(tree):
 
@@ -207,14 +198,6 @@ def describe(tree):
     action_node = Node(action)
     adj = get_word(tree[1][1])
     adj_node = Node(adj)
-
-    if action == "is":
-      if get_property(adj) is not None:
-        propy = get_word(tree[0][1])
-        propy_node = Node(propy)
-        subject.get('->').set(propy, propy_node)
-        propy_node.set(action, action_node)
-        action_node.set('.', adj_node)
 
   '''
   Sentences
@@ -331,7 +314,6 @@ def describe(tree):
     
     return prop, prop_node
 
-
   print "ERROR reading " + str(tree)
 
 
@@ -386,33 +368,13 @@ line = raw_input("Enter line: ")
 
 while line != 'stop':
   sent = list(parser.raw_parse(line))[0]
-  print sent
+  # print sent
   if sent[0].label() == "SBARQ":
     print answer(sent)
   else:
     describe(sent)
-    print smap
+    # print smap
   line = raw_input("Enter line: ")
-
-
-
-import pdb; pdb.set_trace()
-
-# def read(parse_tree):
-#   if parse_tree.label() == 'S':
-#     if parse_tree[1].label() == 'V'
-
-
-# s1 = "John has a dog named Spot"
-# s2 = "Spot's color is brown"
-# s3 = "Spot dislikes John because John kicked Spot"
-
-# tokens = nltk.word_tokenize(s3)
-# tagged = nltk.pos_tag(tokens)
-# entities = nltk.chunk.ne_chunk(tagged)
-
-# print entities
-
 
 """
 Mary went sledding
