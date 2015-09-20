@@ -52,7 +52,7 @@ class Node(list):
         if not isinstance(self.get('.'), DummyNode):
           return self.get('.').label
         elif len(self) > 0:
-          return self[0][0] + " " + self[0][1].complete(tokens)
+          return self[0][0] + " " + self[0][1].complete(tokens, qtype)
         else:
           return "Unsure"
     else:
