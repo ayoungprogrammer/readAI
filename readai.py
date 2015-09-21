@@ -2,6 +2,7 @@ from nltk.parse import stanford
 from nltk import Tree
 import os
 import sys
+import getopt
 
 # sys.path.append('~/Downloads/en') # put where you downloaded the nodebox/linguistics
 
@@ -12,8 +13,6 @@ from nltk.parse import stanford
 # Put where you downloaded the stanford-parser-full...
 os.environ['STANFORD_PARSER'] = '.' #'~/Downloads/stanford-parser-full-2015-04-20/'
 os.environ['STANFORD_MODELS'] = '.' #'~/Downloads/stanford-parser-full-2015-04-20/'
-
-parser = stanford.StanfordParser()
 
 smap = {}
 
@@ -121,6 +120,8 @@ def get_word(tree):
 
 
 def get_root_word(word):
+    if word in ['is', 'was']:
+        return 'is'
     return en.verb.present(word)
 
 
@@ -283,6 +284,12 @@ def describe(tree):
                 prop, prop_node = describe(pp_node)
                 action_node.set(prop, prop_node)
 
+        if matches('( VP ( VB/VBZ/VBP/VPZ/VBD/VBG/VBN ) ( NP ) ( SBAR ) )', tree):
+            # SBAR at end
+            sbar, sbar_node = describe(tree[2])
+            action_node.set(sbar, sbar_node)
+
+
         return action, action_node
 
     if matches('( VP ( VB/VBZ/VBP/VPZ/VBD/VBG ) ( S ) )', tree):
@@ -327,7 +334,7 @@ def describe(tree):
 
         return prop, prop_node
 
-    print "ERROR reading " + str(tree)
+    raise ValueError("ERROR reading " + str(tree))
 
 
 def answer(tree):
@@ -363,20 +370,47 @@ def answer(tree):
 
     print "ERROR answering"
 
+def usage():
+    print "Usage: " + sys.argv[0] + " [-d]"
 
-line = raw_input("Enter line: ")
+def main(argv):
 
-while line != 'stop':
-    sent = list(parser.raw_parse(line))[0]
-    # Print parse tree
-    # print sent
-    if sent[0].label() == "SBARQ":
-        print answer(sent)
-    else:
-        describe(sent)
-        # Print semantic map
-        # print smap
+    debug = False
+
+    try:
+        opts, args = getopt.getopt(argv, "hd",["help","debug"])
+    except getopt.GetoptError as e:
+        usage()
+        sys.exit(2)
+    for opt, arg in opts:
+        if opt in ["-h", "help"]:
+            usage()
+            sys.exit(2)
+        if opt in ["-d", "debug"]:
+            debug = True
+
+    parser = stanford.StanfordParser()
+
     line = raw_input("Enter line: ")
+
+    while line != 'stop':
+        sent = list(parser.raw_parse(line))[0]
+        if debug:
+            print sent # print parse tree
+        if sent[0].label() == "SBARQ":
+            print answer(sent)
+        else:
+            try:
+                describe(sent)
+            except ValueError as e:
+                print "Error describing sentence. " + e
+            if debug:
+                print smap # print semantic map
+        line = raw_input("Enter line: ")
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])
 
 # Example:
 """
