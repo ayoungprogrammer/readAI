@@ -8,6 +8,8 @@ A simple artificial intelligence capable of basic reading comprehension.
 
 Install Python 2.7
 
+pip install nltk
+
 [Download Stanford Parser](http://nlp.stanford.edu/software/stanford-parser-full-2015-04-20.zip) 
 
 [Download Nodebox Linguistics](https://www.nodebox.net/code/data/media/linguistics.zip)
